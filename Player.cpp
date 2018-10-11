@@ -68,6 +68,8 @@ void AwfulPlayer::recordAttackByOpponent(Point /* p */)
     // AwfulPlayer completely ignores what the opponent does
 }
 
+
+
 //*********************************************************************
 //  HumanPlayer
 //*********************************************************************
@@ -216,12 +218,12 @@ public:
     virtual void recordAttackResult(Point p, bool validShot, bool shotHit,
                                     bool shipDestroyed, int shipId);
     virtual void recordAttackByOpponent(Point p);
-    
     bool pathExists(vector<Point>&all, Board& b, int ship);
     bool backtrack(vector<Point>&all, Board& b, int ship);
+    bool repeat(Point rand);
+    
     // Return a uniformly distributed random int from 0 to limit-1
     int randInt(int start, int limit);
-    bool repeat(Point rand);
     
 private:
     Point m_lastCellAttacked;
@@ -251,11 +253,8 @@ bool MediocrePlayer::placeShips(Board& b)
     all.clear();
     
     int ship = 0;
-    
     for (int i = 0; i < 50; i++){
-        
         if (pathExists(all, b, ship)){
-            // cout << "true 252";
             b.unblock();
             return true;
         }
@@ -263,8 +262,6 @@ bool MediocrePlayer::placeShips(Board& b)
     
     // b.unblock();
     return false;
-    
-    // if its impossible to fit all the ships, try again 50 times and then return false
 }
 
 
@@ -272,7 +269,6 @@ bool MediocrePlayer::backtrack(vector<Point>&all, Board& b, int ship){
     
     // base case
     if (ship == 0){
-        // cout << "false 265";
         return false;
     }
     
@@ -290,7 +286,6 @@ bool MediocrePlayer::backtrack(vector<Point>&all, Board& b, int ship){
                 ship++;
             }
             pathExists(all, b, ship);
-            // cout << "true 283";
             return true;
         }
     }
@@ -310,11 +305,9 @@ bool MediocrePlayer::backtrack(vector<Point>&all, Board& b, int ship){
             }
             if (pathExists(all, b, ship)){
                 // pathExists(all, b, ship);
-                // cout << "true 302";
                 return true;
             }
             else {
-                // cout << "false332";
                 return false;
             }
         }
@@ -336,11 +329,9 @@ bool MediocrePlayer::backtrack(vector<Point>&all, Board& b, int ship){
                     }
                     if (pathExists(all, b, ship)){
                         //pathExists(all, b, ship);
-                        //  cout << "true 321";
                         return true;
                     }
                     else {
-                        // cout << "false332";
                         return false;
                     }
                 }
@@ -350,22 +341,17 @@ bool MediocrePlayer::backtrack(vector<Point>&all, Board& b, int ship){
     } // end of if
     
     if(!backtrack(all, b, ship)){
-        // cout << "false 327";
         return false;
     }
     
-    // cout << "true 342";
     return true;
 }
 
 bool MediocrePlayer::pathExists(vector<Point>&all, Board& b, int ship){
     
-    // b.display(false);
-    
     // base
     // if (ship < 0 || ship > game().nShips()){
     if (ship == game().nShips()){
-        // cout << "true 345";
         return true;
     }
     
@@ -377,14 +363,13 @@ bool MediocrePlayer::pathExists(vector<Point>&all, Board& b, int ship){
             Point cur(r, c);
             if (b.placeShip(cur, ship, HORIZONTAL) || b.placeShip(cur, ship, VERTICAL)){
                 all.push_back(cur);
-                // cout << "success";
+
                 // ALL SIZE SHOULD BE THE SAME OR EQUAL TO NUMBER OF SHIPS***
                 if (ship < game().nShips()){
                     ship++;
                 }
                 
                 if (!pathExists(all, b, ship)){
-                    // cout << "false 350";
                     return false;
                 }
                 done = true;
@@ -397,13 +382,10 @@ bool MediocrePlayer::pathExists(vector<Point>&all, Board& b, int ship){
     // if (tempship == ship && ship != game().nShips()){
     if (tempship == ship){
         if(!backtrack(all, b, ship)){
-            // cout << "false 366";
             return false;
         }
-        // cout << "***";
     }
-    
-    // cout << "true377";
+   
     return true;
     
 }
@@ -420,18 +402,15 @@ bool MediocrePlayer::repeat(Point rand){
 
 Point MediocrePlayer::recommendAttack()
 {
-    
     for (int a = 0; a < game().nShips(); a++){
         if (game().shipLength(a) > 5){
-            m_state = 1;
+            m_state = 2;
             break;
         }
     }
     
     // NOTE: STATE 2 CHECK FOR NO REPEATS EITHER (IN THE CASE OF LENGTH 6 SHIPS)
-    
     if (m_state == 2){
-        // cout << "transition" << m_transition.r << " " << m_transition.c;
         Point randinbounds(-1, -1);
         
         // try every row
@@ -452,7 +431,7 @@ Point MediocrePlayer::recommendAttack()
             }
         }
         
-        /*
+        /* Testing
          for (int k = 0; k < cross.size(); k++){
          cout << "cross " << cross[k].r << cross[k].c << " ";
          }
@@ -473,6 +452,7 @@ Point MediocrePlayer::recommendAttack()
     }
     
     cross.clear();
+    
     // if state 1, return a random point that has not been chosen before
     // if everything in the cross was hit, revert to state 1
     // if (m_state == 1) {
@@ -481,21 +461,16 @@ Point MediocrePlayer::recommendAttack()
     
     for (int i = 0; i < m_points.size(); i++){
         // keeps generating a new point if point is already present
-        // cout << "check these pts: " << m_points[i].r << m_points[i].c << "   with these pts: " << rand.r << rand.c << endl;
         while (rand.r == m_points[i].r && rand.c == m_points[i].c){
-            // cout << endl << "exxxxxxxxxxxxx" << endl;
             rand = game().randomPoint();
             i = 0;
             counter++;
-            // if all the points are selected, infinite loop?
         }
     }
     
     m_points.push_back(rand);
     
     return rand;
-    // }
-    
     
     // return m_lastCellAttacked;
     
@@ -503,7 +478,6 @@ Point MediocrePlayer::recommendAttack()
 
 void MediocrePlayer::recordAttackResult(Point p, bool validShot, bool shotHit, bool shipDestroyed, int shipId)
 {
-    // cout << validShot << shotHit << shipDestroyed << endl;
     // P would be the rand point returned from recommendAttack
     
     // if it is a valid shot and it missed
@@ -521,7 +495,6 @@ void MediocrePlayer::recordAttackResult(Point p, bool validShot, bool shotHit, b
         // point that caused the transition from state 1 to state 2
         if (m_state == 1){
             m_transition = p;
-            // cout << "line475"<<m_transition.r<<m_transition.c<<endl;
         }
         
         m_state = 2;
@@ -765,116 +738,7 @@ Point GoodPlayer::recommendAttack()
      }
      }
      
-     else if (!firstattempt && m_firsttry == 2){
-     Point above(middle.r - 3, middle.c + 3);
-     m_lastCellTried = above;
-     if (game().isValid(above) && !repeat(above)){
-     cout << "3";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
-     else if (!firstattempt && m_firsttry == 3){
-     Point above(middle.r, middle.c + 3);
-     m_lastCellTried = above;
-     if (game().isValid(above) && !repeat(above)){
-     cout << "4";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
-     else if (!firstattempt && m_firsttry == 4){
-     Point above(middle.r + 3, middle.c + 3);
-     m_lastCellTried = above;
-     if (game().isValid(above) && !repeat(above)){
-     cout << "5";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
-     else if (!firstattempt && m_firsttry == 5){
-     Point above(middle.r + 3, middle.c);
-     m_lastCellTried = above;
-     if (game().isValid(above) && repeat(above)){
-     cout << "6";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
-     else if (!firstattempt && m_firsttry == 6){
-     Point above(middle.r + 3, middle.c - 3);
-     m_lastCellTried = above;
-     if (game().isValid(above) && !repeat(above)){
-     cout << "7";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
-     else if (!firstattempt && m_firsttry == 7){
-     Point above(middle.r, middle.c - 3);
-     m_lastCellTried = above;
-     if (game().isValid(above) && !repeat(above)){
-     cout << "8";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
-     else if (!firstattempt && m_firsttry == 8){
-     Point above(middle.r - 3, middle.c - 3);
-     m_lastCellTried = above;
-     if (game().isValid(above) && !repeat(above)){
-     cout << "9";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
-     else if (!firstattempt && m_firsttry == 9){
-     Point above(1 , 1);
-     m_lastCellTried = above;
-     if (game().isValid(above) && !repeat(above)){
-     cout << "10";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
-     else if (!firstattempt && m_firsttry == 10){
-     Point above(game().rows() - 1 , game().cols() - 1);
-     m_lastCellTried = above;
-     if (game().isValid(above)&& !repeat(above)){
-     cout << "11";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
-     else if (!firstattempt && m_firsttry == 11){
-     Point above(0, game().cols() - 1);
-     m_lastCellTried = above;
-     if (game().isValid(above)&& !repeat(above)){
-     cout << "12";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
-     else if (!firstattempt && m_firsttry == 12){
-     Point above(game().rows() - 1, 0);
-     m_lastCellTried = above;
-     cout << "13";
-     if (game().isValid(above)&& !repeat(above)){
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
+    
      else {  // go random // CHANGE*
      
      Point rand = game().randomPoint();
@@ -891,8 +755,9 @@ Point GoodPlayer::recommendAttack()
      
      
      } // end of if
-     
-     
+     */
+    
+    /*
      //////////////////////////////////////////////////////////////////////////////
      // hit but not destroyed
      if (m_state == 2) {
@@ -937,7 +802,9 @@ Point GoodPlayer::recommendAttack()
      }
      }
      }
-     
+     */
+    
+     /*
      else {
      // did NOT prev hit, so change direction from transition point
      
@@ -981,20 +848,8 @@ Point GoodPlayer::recommendAttack()
      return next;
      }
      }
-     
-     else if (switchdir && m_try == 3){
-     // try col to left
-     next.r = m_transition.r;
-     next.c = m_transition.c -1;
-     
-     if (!repeat(next) && game().isValid(next)){
-     m_points.push_back(next);
-     cout << "else4";
-     return next;
-     }
-     }
-     }
-     
+     */
+    
      /*
      if (m_state == 2){
      // cout << "transition" << m_transition.r << " " << m_transition.c;
@@ -1242,9 +1097,8 @@ void GoodPlayer::recordAttackResult(Point p, bool validShot, bool shotHit, bool 
 
 void GoodPlayer::recordAttackByOpponent(Point p)
 {
-    // TODO
-}
 
+}
 
 
 

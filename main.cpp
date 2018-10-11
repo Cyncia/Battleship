@@ -26,7 +26,7 @@ int main()
     cout << "  3.  A " << NTRIALS
     << "-game match between a mediocre and an awful player, with no pauses"
     << endl;
-    cout << "  4.  Good Players" << endl;
+    cout << "  4.  A single game match between a good player and a mediocre player, with no pauses" << endl;
     cout << "  5.  My Own Game for Testing" << endl;
     cout << "Enter your choice: ";
     string line;
@@ -123,15 +123,16 @@ int main()
          battleship.play(p1, p2);
          delete p1;
          delete p2;
-         
-         
-         /* Testing 
+         */
+        
+         /*
+         // Testing
          Player* p1 = createPlayer("awful", "Popeye", g);
          Player* p2 = createPlayer("awful", "Bluto", g);
          cout << g.nShips() << endl;
          cout << g.shipLength(0) << " " << g.shipSymbol(0) << " " << g.shipName(0) << " " << endl;
          cout << g.shipLength(1) << endl;
-         */
+         
         
         battleship.addShip(3, 'A', "Air");
         battleship.addShip(2, 'C', "Car");
@@ -146,7 +147,7 @@ int main()
         battleship.play(p1, p2);
         delete p1;
         delete p2;
-        
+        */
         
         /* Testing Board Functionality
          // Board b(battleship);
