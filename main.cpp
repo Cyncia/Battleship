@@ -93,7 +93,7 @@ int main()
         addStandardShips(battleship);
         
         Player* p1 = createPlayer("good", "Good G", battleship);
-        Player* p2 = createPlayer("mediocre", "med A", battleship);
+        Player* p2 = createPlayer("mediocre", "Mediocre M", battleship);
         
         battleship.play(p1, p2, false);
         

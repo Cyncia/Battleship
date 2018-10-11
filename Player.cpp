@@ -563,13 +563,16 @@ public:
     bool putintoquad(int quad, int midrow, int midcol, int rows, int cols, int shipid, Board& b);
     int randInt(int start, int limit);
     bool repeat(Point rand);
-    int finddirectionofone (Point one, Point two);
+    int getEvenNum (int randStart, int randEnd);
+    Point generateEvenPoint (int rStart, int rEnd, int cStart, int cEnd);
+    int findDirection (Point one, Point two);
 private:
     Point m_lastCellAttacked;
     Point m_lastCellTried;
     int m_state;
     int m_try;
     int m_firsttry;
+    int nextPoint;
     Point m_transition;
     vector <Point> m_points;
     vector <Point> cross;
@@ -581,7 +584,7 @@ private:
 };
 
 GoodPlayer::GoodPlayer(string nm, const Game& g)
-: Player(nm, g), m_lastCellAttacked(0, 0), m_state(1), m_transition(0, 0), firstattempt(true), m_try(0), m_lastCellTried(0,0), switchdir(false), didhit(false)
+: Player(nm, g), m_lastCellAttacked(0, 0), m_state(1), nextPoint(1), m_transition(0, 0), firstattempt(true), m_try(0), m_lastCellTried(0,0), switchdir(false), didhit(false)
 {}
 
 int GoodPlayer::randInt(int start, int limit){
@@ -598,27 +601,26 @@ bool GoodPlayer::placeShips(Board& b)
     int rows = game().rows();
     int cols = game().cols();
     int ships = game().nShips();
+    Direction dir;
+    list <int> quad;
+    bool check = 0;
+    int count = 0;
+
+    // ?
+    int num = 0;
     int midrow = (rows / 2);
     int midcol = (cols / 2);
-    bool check = 0;
-    int num = 0;
-    list <int> quad;
+    
     for (int i = 1; i < 5; i ++){
-        quad.push_back(i);
+        quad.push_back(i);  // 4 quads
     }
     
-    Direction dir;
-    int count = 0;
-    
     for (int i = 0; i < game().nShips(); i++){
-        
-        
         check = 0;
         
         if (count < 100){
             while (!check){
-                Point four(randInt(0, rows), randInt(0, cols));
-                
+                Point initialPlacement(randInt(0, rows), randInt(0, cols));
                 int d = randInt(0, 2);
                 if (d == 0){
                     dir = HORIZONTAL;
@@ -627,7 +629,7 @@ bool GoodPlayer::placeShips(Board& b)
                     dir = VERTICAL;
                 }
                 
-                if (b.placeShip(four, i, dir)){
+                if (b.placeShip(initialPlacement, i, dir)){
                     check = 1;
                 }
                 count++;
@@ -635,39 +637,6 @@ bool GoodPlayer::placeShips(Board& b)
         }
         
     }
-    
-    /*
-     check = 0;
-     while (check){
-     Point one(randInt(0, midrow), randInt(midcol, cols));
-     if (b.placeShip(one, i, dir)){
-     check = 1;
-     }
-     }
-     
-     check = 0;
-     while (check){
-     Point two(randInt(0, midrow), randInt(0, midcol));
-     if (b.placeShip(two, i, dir)){
-     check = 1;
-     }
-     }
-     
-     check = 0;
-     while (check){
-     Point three(randInt(midrow, rows), randInt(0, midcol));
-     if (b.placeShip(three, i, dir)){
-     check = 1;
-     }
-     }
-     
-     check = 0;
-     while (check){
-     Point four(randInt(midrow, rows), randInt(midcol, cols));
-     if (b.placeShip(four, i, dir)){
-     check = 1;
-     }
-     */
     
     return true;
 }
@@ -682,7 +651,7 @@ bool GoodPlayer::repeat(Point rand){
     return false;
 }
 
-int GoodPlayer::finddirectionofone (Point one, Point two){
+int GoodPlayer::findDirection (Point one, Point two){
     if (one.r == two.r && one.c > two.c){
         //EAST
         return 2;
@@ -708,290 +677,81 @@ int GoodPlayer::finddirectionofone (Point one, Point two){
     
 }
 
+int GoodPlayer::getEvenNum (int randStart, int randEnd) {
+    int num = 1;
+    
+    while (num % 2 != 0 ) {
+        num = randInt(randStart, randEnd);
+    }
+    
+    return num;
+}
+
+Point GoodPlayer::generateEvenPoint (int rStart, int rEnd, int cStart, int cEnd) {
+    Point temp(getEvenNum(rStart, rEnd), getEvenNum(cStart, cEnd));
+    
+    while (repeat(temp)) {
+        temp.r = getEvenNum(rStart, rEnd);
+        temp.c = getEvenNum(cStart, cEnd);
+    }
+    
+    return temp;
+}
+
 Point GoodPlayer::recommendAttack()
 {
-    /*
-     // not enough info
-     if (m_state == 1){
-     
-     // try the middle first
-     if (firstattempt){
-     int midrow = (game().rows() / 2);
-     int midcol = (game().cols() / 2);
-     Point firstattemptpt(midrow, midcol);
-     if (!repeat(firstattemptpt)){
-     cout << "1";
-     middle = firstattemptpt;
-     firstattempt = false;
-     return firstattemptpt;
-     }
-     }
-     
-     // next try
-     else if (!firstattempt && m_firsttry == 1){
-     Point above(middle.r - 3, middle.c);
-     m_lastCellTried = above;
-     if (game().isValid(above) && !repeat(above)){
-     cout << "2";
-     m_points.push_back(above);
-     return above;
-     }
-     }
-     
+    // think of board as a checkerboard, pick even coords
+    int midrow = (game().rows() / 2);
+    int midcol = (game().cols() / 2);
+    int row = game().rows();
+    int col = game().cols();
     
-     else {  // go random // CHANGE*
-     
-     Point rand = game().randomPoint();
-     
-     // keeps generating a new point if point is already present
-     while (repeat(rand)){
-     rand = game().randomPoint();
-     }
-     
-     cout << "14";
-     m_points.push_back(rand);
-     return rand;
-     }
-     
-     
-     } // end of if
-     */
-    
-    /*
-     //////////////////////////////////////////////////////////////////////////////
-     // hit but not destroyed
-     if (m_state == 2) {
-     
-     // previously returned point did hit a ship, 2nd hit and beyond
-     // want to continue in the same direction
-     if (didhit == true){
-     if (finddirectionofone(consecutivepoint, m_transition) == 1){
-     Point next = consecutivepoint;
-     next.r = next.r - 1;
-     if(game().isValid(next) && !repeat(next)){
-     cout << "yes1";
-     m_points.push_back(next);
-     return next;
-     }
-     }
-     else if (finddirectionofone(consecutivepoint, m_transition) == 3){
-     Point next = consecutivepoint;
-     next.r = next.r + 1;
-     if(game().isValid(next) && !repeat(next)){
-     cout << "yes2";
-     m_points.push_back(next);
-     return next;
-     }
-     }
-     else if (finddirectionofone(consecutivepoint, m_transition) == 2){
-     Point next = consecutivepoint;
-     next.c = next.c + 1;
-     if(game().isValid(next) && !repeat(next)){
-     cout << "yes3";
-     m_points.push_back(next);
-     return next;
-     }
-     }
-     else if (finddirectionofone(consecutivepoint, m_transition) == 4){
-     Point next = consecutivepoint;
-     next.c = next.c - 1;
-     if(game().isValid(next) && repeat(next)){
-     cout << "yes4";
-     m_points.push_back(next);
-     return next;
-     }
-     }
-     }
-     */
-    
-     /*
-     else {
-     // did NOT prev hit, so change direction from transition point
-     
-     Point next;
-     
-     // FROM STATE 2 --> 1, RETRY DIFF DIRECTION
-     
-     if (firstattempt && !switchdir){
-     // try row right below
-     next.r = m_lastCellAttacked.r + 1;
-     next.c = m_lastCellAttacked.c;
-     
-     if (!repeat(next) && game().isValid(next)){
-     m_points.push_back(next);
-     cout << "else1";
-     return next;
-     }
-     
-     }
-     
-     else if (switchdir && m_try == 1){
-     // try row right above
-     next.r = m_transition.r - 1;
-     next.c = m_transition.c;
-     
-     if (!repeat(next) && game().isValid(next)){
-     m_points.push_back(next);
-     cout << "else2";
-     return next;
-     }
-     }
-     
-     else if (switchdir && m_try == 2){
-     // try col to right
-     next.r = m_transition.r;
-     next.c = m_transition.c + 1;
-     
-     if (!repeat(next) && game().isValid(next)){
-     m_points.push_back(next);
-     cout << "else3";
-     return next;
-     }
-     }
-     */
-    
-     /*
-     if (m_state == 2){
-     // cout << "transition" << m_transition.r << " " << m_transition.c;
-     Point randinbounds(-1, -1);
-     
-     // try every row
-     for (int mr = 1; mr < 5; mr++){
-     randinbounds.r = m_transition.r + mr;
-     randinbounds.c = m_transition.c;
-     if (game().isValid(randinbounds)){
-     cross.push_back(randinbounds);
-     }
-     }
-     
-     for (int mr = 4; mr > 0; mr--){
-     randinbounds.r = m_transition.r - mr;
-     randinbounds.c = m_transition.c;
-     if (game().isValid(randinbounds)){
-     cross.push_back(randinbounds);
-     }
-     }
-     
-     
-     // try every col
-     for (int mc = 0; mc < 5; mc++){
-     randinbounds.c = m_transition.c + mc;
-     randinbounds.r = m_transition.r;
-     if (game().isValid(randinbounds)){
-     cross.push_back(randinbounds);
-     }
-     }
-     
-     
-     for (int mc = 4; mc > 5; mc--){
-     randinbounds.c = m_transition.c - mc;
-     randinbounds.r = m_transition.r;
-     if (game().isValid(randinbounds)){
-     cross.push_back(randinbounds);
-     }
-     }
-     
-     
-     for (int k = 0; k < cross.size(); k++){
-     cout << "cross " << cross[k].r << cross[k].c << " ";
-     }
-     
-     cout << endl << endl;
-     
-     for (int h = 0; h < m_points.size(); h++){
-     cout << "points " << m_points[h].r << m_points[h].c << " ";
-     }
-     
-     cross.clear();
-     }
-     
-     }
-     return m_lastCellAttacked; */
-    
-    
-    for (int a = 0; a < game().nShips(); a++){
-        if (game().shipLength(a) > 5){
-            m_state = 1;
-            break;
+    // valid shot but missed or just destroyed a ship
+    if (m_state == 1) {
+
+        Point inQuad(0, 0);
+        
+        switch (nextPoint) {
+            case 1:
+                inQuad = generateEvenPoint(0, midrow, 0, midcol);
+                nextPoint = 2;
+                break;
+                
+            case 2:
+                inQuad = generateEvenPoint(midrow, row, 0, midcol);
+                nextPoint = 3;
+                break;
+                
+            case 3:
+                inQuad = generateEvenPoint(midrow, row, midcol, col);
+                nextPoint = 4;
+                break;
+                
+            case 4:
+                inQuad = generateEvenPoint(0, midrow, midcol, col);
+                nextPoint = 1;
+                break;
+                
+            default:
+                cout << "Error: GoodPlayer recommendAttack() nextPoint out of bounds" << endl;
+                break;
         }
+        
+        m_points.push_back(inQuad);
+        return inQuad;
     }
     
-    // NOTE: STATE 2 CHECK FOR NO REPEATS EITHER (IN THE CASE OF LENGTH 6 SHIPS)
+    // hit ship but not destroyed
+    else if (m_state == 2) { }
+    Point temp(0, 0);
     
-    if (m_state == 2){
-        // cout << "transition" << m_transition.r << " " << m_transition.c;
-        Point randinbounds(-1, -1);
-        
-        // try every row
-        for (int mr = 1; mr < 5; mr++){
-            randinbounds.r = m_transition.r + mr;
-            randinbounds.c = m_transition.c;
-            if (game().isValid(randinbounds)){
-                cross.push_back(randinbounds);
-            }
-        }
-        
-        for (int mr = 4; mr > 0; mr--){
-            randinbounds.r = m_transition.r - mr;
-            randinbounds.c = m_transition.c;
-            if (game().isValid(randinbounds)){
-                cross.push_back(randinbounds);
-            }
-        }
-        
-        
-        // try every col
-        for (int mc = 0; mc < 5; mc++){
-            randinbounds.c = m_transition.c + mc;
-            randinbounds.r = m_transition.r;
-            if (game().isValid(randinbounds)){
-                cross.push_back(randinbounds);
-            }
-        }
-        
-        
-        for (int mc = 4; mc > 5; mc--){
-            randinbounds.c = m_transition.c - mc;
-            randinbounds.r = m_transition.r;
-            if (game().isValid(randinbounds)){
-                cross.push_back(randinbounds);
-            }
-        }
-        
-        for (int j = 0; j < cross.size(); j++){
-            if (!repeat(cross[j])){
-                m_points.push_back(cross[j]);
-                return cross[j];
-            }
-        }
-        cross.clear();
-    }
-    
-    // if state 1, return a random point that has not been chosen before
-    // if everything in the cross was hit, revert to state 1
-    // if (m_state == 1) {
-    
-    Point rand = game().randomPoint();
-    
-    for (int i = 0; i < m_points.size(); i++){
-        while (rand.r == m_points[i].r && rand.c == m_points[i].c){
-            rand = game().randomPoint();
-            i = 0;
-        }
-    }
-    
-    m_points.push_back(rand);
-    
-    return rand;
-    
+    return temp;
     
 }
 
 
 void GoodPlayer::recordAttackResult(Point p, bool validShot, bool shotHit, bool shipDestroyed, int shipId )
 {
-    
-    // cout << validShot << shotHit << shipDestroyed << endl;
     // P would be the rand point returned from recommendAttack
     
     // if it is a valid shot and it missed
@@ -1002,12 +762,14 @@ void GoodPlayer::recordAttackResult(Point p, bool validShot, bool shotHit, bool 
     if (validShot && shotHit && shipDestroyed){
         m_state = 1;
     }
-    
+ 
     // hit a ship but did not destroy it
     if (validShot && shotHit && !shipDestroyed){
         
-        // point that caused the transition from state 1 to state 2
+        // point that caused the transition from state 1 to state 2 (first hit of a ship)
         if (m_state == 1){
+            
+            // find direction and record point
             m_transition = p;
         }
         
@@ -1020,6 +782,8 @@ void GoodPlayer::recordAttackResult(Point p, bool validShot, bool shotHit, bool 
         
         m_state = 2;
     }
+    
+    // ----------------------------------------------------
     
     // as long as there is one ship with length 6, follow this procedure
     // only after each position within a radius of 4 was hit, switch to case 1

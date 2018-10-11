@@ -22,3 +22,7 @@ The current board size for a game is 10x10. The board size for a mini-game is 2x
 The number of ships can also be adjusted with the addShip function located in Game.cpp. There is also a addStandardShips function, within main.cpp, which uses a pre-existing set of ships for the game instead of manually adding ships one by one. Both functions can also be used simultaneously within the same game.
 
 NOTE: Please do NOT copy and/or use this code
+
+todo:
+* check placeShip & pathExists for Mediocre Player (occasionally for option 1, the ships are unable to be placed)
+* improve good player
