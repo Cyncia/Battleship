@@ -569,22 +569,25 @@ public:
 private:
     Point m_lastCellAttacked;
     Point m_lastCellTried;
-    int m_state;
-    int m_try;
-    int m_firsttry;
-    int nextPoint;
     Point m_transition;
     vector <Point> m_points;
     vector <Point> cross;
+    bool switchdir;
+    int m_state;
+    int nextPoint;
+    
+    /*
+    int m_try;
+    int m_firsttry;
     bool firstattempt;
     Point middle;
     Point consecutivepoint;
-    bool switchdir;
     bool didhit;
+    */
 };
 
 GoodPlayer::GoodPlayer(string nm, const Game& g)
-: Player(nm, g), m_lastCellAttacked(0, 0), m_state(1), nextPoint(1), m_transition(0, 0), firstattempt(true), m_try(0), m_lastCellTried(0,0), switchdir(false), didhit(false)
+: Player(nm, g), m_lastCellAttacked(0, 0), m_lastCellTried(0,0), m_state(1), nextPoint(1), m_transition(0, 0), switchdir(false)
 {}
 
 int GoodPlayer::randInt(int start, int limit){
@@ -652,19 +655,14 @@ bool GoodPlayer::repeat(Point rand){
 }
 
 int GoodPlayer::findDirection (Point one, Point two){
-    if (one.r == two.r && one.c > two.c){
-        //EAST
-        return 2;
-    }
-    
-    else if (one.r == two.r && one.c < two.c){
-        // WEST
-        return 4;
-    }
-    
-    else if (one.c == two.c && one.r < two.r){
+    if (one.c == two.c && one.r < two.r){
         // NORTH
         return 1;
+    }
+    
+    else if (one.r == two.r && one.c > two.c){
+        //EAST
+        return 2;
     }
     
     else if (one.c == two.c && one.r > two.c){
@@ -672,9 +670,10 @@ int GoodPlayer::findDirection (Point one, Point two){
         return 3;
     }
     
-    // need to fix***
-    return randInt(1, 5);
-    
+    else if (one.r == two.r && one.c < two.c){
+        // WEST
+        return 4;
+    }
 }
 
 int GoodPlayer::getEvenNum (int randStart, int randEnd) {
@@ -768,9 +767,20 @@ void GoodPlayer::recordAttackResult(Point p, bool validShot, bool shotHit, bool 
         
         // point that caused the transition from state 1 to state 2 (first hit of a ship)
         if (m_state == 1){
-            
-            // find direction and record point
+            // record point and test for direction
             m_transition = p;
+            
+            // up
+            p.c + 1
+            
+            // down
+            p.c - 1
+            
+            // left
+            p.r - 1
+            
+            // right
+            p.r + 1
         }
         
         if (m_state == 2) {
@@ -784,20 +794,7 @@ void GoodPlayer::recordAttackResult(Point p, bool validShot, bool shotHit, bool 
     }
     
     // ----------------------------------------------------
-    
-    // as long as there is one ship with length 6, follow this procedure
-    // only after each position within a radius of 4 was hit, switch to case 1
-    for (int i = 0; i < game().nShips(); i++){
-        if (game().shipLength(i) > 5){
-            
-        }
-    }
-    
-    
     /*
-     // if it is a valid shot and it missed
-     if (validShot && !shotHit){
-     
      // hit before, missed next
      if (m_state == 2){
      // go back and try another direction
@@ -851,11 +848,8 @@ void GoodPlayer::recordAttackResult(Point p, bool validShot, bool shotHit, bool 
      m_try = 0;
      firstattempt = true;
      switchdir = false;
-     
-     
+
      }
-     
-     
      */
 }
 
