@@ -26,15 +26,17 @@ int main()
     cout << "  3.  A " << NTRIALS
     << "-game match between a mediocre and an awful player, with no pauses"
     << endl;
-    cout << "  4.  My Own Game for Testing" << endl;
-    cout << "  5.  Good Players" << endl;
+    cout << "  4.  Good Players" << endl;
+    cout << "  5.  My Own Game for Testing" << endl;
     cout << "Enter your choice: ";
     string line;
     getline(cin,line);
+    
     if (line.empty())
     {
         cout << "You did not enter a choice" << endl;
     }
+    
     else if (line[0] == '1')
     {
         Game g(2, 3);
@@ -48,6 +50,7 @@ int main()
         delete p1;
         delete p2;
     }
+    
     else if (line[0] == '2')
     {
         Game g(10, 10);
@@ -58,6 +61,7 @@ int main()
         delete p1;
         delete p2;
     }
+    
     else if (line[0] == '3')
     {
         int nMediocreWins = 0;
@@ -85,16 +89,30 @@ int main()
     }
     
     else if (line[0] == '4'){
+        Game battleship(10, 10);
+        addStandardShips(battleship);
+        
+        Player* p1 = createPlayer("good", "Good G", battleship);
+        Player* p2 = createPlayer("mediocre", "med A", battleship);
+        
+        battleship.play(p1, p2, false);
+        
+        delete p1;
+        delete p2;
+    }
+    
+    // My Own Game to Test
+    else if (line[0] == '5'){
         Game battleship(6, 7);
         
-        /*
+        /* Testing Board Initialization
          assert(!battleship.addShip(-5, 'B', "Badlength"));
          assert(!battleship.addShip(0, 'Z', "Badlength2"));
          assert(!battleship.addShip(2, '.', "Badsymbol"));
-         assert(!battleship.addShip(2, 'X', "Badsymbol2"));*
+         assert(!battleship.addShip(2, 'X', "Badsymbol2"));
+         // assert(!battleship.addShip(5, 'A', "Badair"));
          battleship.addShip(3, 'A', "Air");
          battleship.addShip(3, 'J', "Jet");
-         // assert(!battleship.addShip(5, 'A', "Badair"));
          battleship.addShip(2, 'C', "Car");
          battleship.addShip(5, 'S', "Sub");
          battleship.addShip(4, 'L', "L");
@@ -107,34 +125,32 @@ int main()
          delete p2;
          
          
-         // *IGNORE THIS FOR NOW*
-         // Player* p1 = createPlayer("awful", "Popeye", g);
-         // Player* p2 = createPlayer("awful", "Bluto", g);
-         
-         //TESTING
-         // cout << g.nShips() << endl;
-         // cout << g.shipLength(0) << " " << g.shipSymbol(0) << " " << g.shipName(0) << " " << endl;
-         // cout << g.shipLength(1) << endl;
+         /* Testing 
+         Player* p1 = createPlayer("awful", "Popeye", g);
+         Player* p2 = createPlayer("awful", "Bluto", g);
+         cout << g.nShips() << endl;
+         cout << g.shipLength(0) << " " << g.shipSymbol(0) << " " << g.shipName(0) << " " << endl;
+         cout << g.shipLength(1) << endl;
          */
         
         battleship.addShip(3, 'A', "Air");
-        // battleship.addShip(3, 'J', "Jet");
         battleship.addShip(2, 'C', "Car");
-        // battleship.addShip(5, 'S', "Sub");
         battleship.addShip(4, 'L', "L");
+        // battleship.addShip(3, 'J', "Jet");
+        // battleship.addShip(5, 'S', "Sub");
         
         Player* p1 = createPlayer("mediocre", "Med Mimi", battleship);
-        // Player* p2 = createPlayer("human", "Human Hehe", battleship);
         Player* p2 = createPlayer("mediocre", "Med Meimei", battleship);
+        // Player* p2 = createPlayer("human", "Human Hehe", battleship);
         
         battleship.play(p1, p2);
         delete p1;
         delete p2;
         
         
-        // Board b(battleship);
-        
-        /*
+        /* Testing Board Functionality
+         // Board b(battleship);
+         
          cout << endl;
          b.display(true);
          cout << endl;
@@ -166,27 +182,7 @@ int main()
          // cout << b.placeShip(p, 0, VERTICAL) << endl;
          // cout << b.placeShip(ppp, 1, HORIZONTAL) << endl;
          */
-        
-        
-        // b.display(false);
-        
-        
     }
-    
-    else if (line[0] == '5'){
-        Game battleship(10, 10);
-        addStandardShips(battleship);
-        
-        Player* p1 = createPlayer("good", "Good G", battleship);
-        Player* p2 = createPlayer("mediocre", "med A", battleship);
-        
-        battleship.play(p1, p2, false);
-        
-        delete p1;
-        delete p2;
-    }
-    
-    
     
     else
     {

@@ -1,12 +1,11 @@
 #include "Game.h"
 #include "Board.h"
 #include "Player.h"
-#include "globals.h"
+
 #include <iostream>
 #include <string>
 #include <cstdlib>
 #include <cctype>
-
 #include <vector>
 #include <string>
 
@@ -55,7 +54,7 @@ void waitForEnter()
     cin.ignore(10000, '\n');
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 // Ship Functions
 Ship::Ship(int length, char symbol, string name){
     m_length = length;
@@ -75,7 +74,7 @@ string Ship::name() const {
     return m_name;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 // GameImpl Functions
 GameImpl::GameImpl(int nRows, int nCols)
 {
@@ -140,11 +139,15 @@ Player* GameImpl::play(Player* p1, Player* p2, Board& b1, Board& b2, bool should
     // p1 will have b1
     // p2 will have b2
     
-    // sets each player's ships
-    // might fail because:
-    // no configuration of ships will fit
-    // mediocre player unable to place ships due to blocked area
-    if (!(p1->placeShips(b1))){     // if ships could not be placed on the board before the game began (placeShips from player class)
+    /*
+     * sets each player's ships
+     * might fail because:
+        - no configuration of ships will fit
+        - mediocre player unable to place ships due to blocked area
+     * if ships could not be placed on the board before the game began (placeShips from player class)
+     */
+    
+    if (!(p1->placeShips(b1))){
         // cout << endl << "b1: " << endl;
         b1.display(false);
         cout << "ERROR: Ships cannot be placed for P1, Game cannot start" << endl;
@@ -157,25 +160,21 @@ Player* GameImpl::play(Player* p1, Player* p2, Board& b1, Board& b2, bool should
         cout << "ERROR: Ships cannot be placed for P2, Game cannot start" << endl;
         return nullptr;
     }
-    
-    // as a precaution
-    // if # of ships on the board is zero...
-    // return nullptr
-    
+   
     /*
      b1.display(0);
      cout << endl;
      b2.display(0);
      cout << "after placing ships in game.cpp";*/
     
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
     bool hit = 0; // shotHIT
     bool shot = 0;  // validSHOT
     bool destroy = 0;
     int id = -1;
     Point P;
     
-    // loop until someone wins -- have no more ships
+    // loop until someone wins (i.e., have no more ships)
     // while(p1->game().nShips() != 0 || p2->game().nShips() != 0){
     while(!b1.allShipsDestroyed() && !b2.allShipsDestroyed()) {
         
@@ -222,6 +221,7 @@ Player* GameImpl::play(Player* p1, Player* p2, Board& b1, Board& b2, bool should
             p1->recordAttackResult(P, shot, hit, destroy, id);
             
         } // end of if Human
+        
         // P1 != HUMAN
         if (!p1->isHuman()){
             cout << p1->name() << "'s turn. Board for " << p2->name() << ": " << endl;
@@ -259,7 +259,7 @@ Player* GameImpl::play(Player* p1, Player* p2, Board& b1, Board& b2, bool should
             
             // opponent needs to know where the attack was made on his/her board
             p2->recordAttackByOpponent(P);
-            // cout << "main: " << shot << hit << destroy << endl;
+            
             // attacker needs to know the results of his/her attack
             p1->recordAttackResult(P, shot, hit, destroy, id);
         }
@@ -268,7 +268,7 @@ Player* GameImpl::play(Player* p1, Player* p2, Board& b1, Board& b2, bool should
             break;
         };
         
-        /////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////
         // P2 = HUMAN
         if (p2->isHuman()){
             
@@ -347,7 +347,7 @@ Player* GameImpl::play(Player* p1, Player* p2, Board& b1, Board& b2, bool should
             
             // opponent needs to know where the attack was made on his/her board
             p1->recordAttackByOpponent(P);
-            // cout << "main: " << shot << hit << destroy << endl;
+           
             // attacker needs to know the results of his/her attack
             p2->recordAttackResult(P, shot, hit, destroy, id);
         }

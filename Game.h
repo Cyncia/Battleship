@@ -23,6 +23,7 @@ public:
     char shipSymbol(int shipId) const;
     std::string shipName(int shipId) const;
     Player* play(Player* p1, Player* p2, bool shouldPause = true);
+    
     // We prevent a Game object from being copied or assigned
     Game(const Game&) = delete;
     Game& operator=(const Game&) = delete;

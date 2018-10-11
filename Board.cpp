@@ -1,6 +1,5 @@
 #include "Board.h"
 #include "Game.h"
-#include "globals.h"
 #include <iostream>
 
 using namespace std;
@@ -19,8 +18,6 @@ public:
     bool allShipsDestroyed() const;
     
 private:
-    // TODO:  Decide what private members you need.  Here's one that's likely
-    //        to be useful:
     const Game& m_game;
     int m_ships;
     char m_board[MAXROWS][MAXCOLS];
@@ -55,7 +52,6 @@ void BoardImpl::clear()
 
 void BoardImpl::block()
 {
-    
     // Block cells with 50% probability
     for (int r = 0; r < m_game.rows(); r++)
         for (int c = 0; c < m_game.cols(); c++)
@@ -65,13 +61,12 @@ void BoardImpl::block()
                 m_board[r][c] = '#';
             }
     
-    
     //TESTING BOARDS
     /*
      for (int r = 0; r < 2; r++){
-     for (int c = 0; c < m_game.cols(); c++)
-     { m_board[r][c] = '#'; }
-     }
+        for (int c = 0; c < m_game.cols(); c++)
+            { m_board[r][c] = '#'; }
+        }
      m_board[2][0] = '#';
      m_board[2][2] = '#';
      m_board[2][3] = '#';
@@ -94,19 +89,17 @@ void BoardImpl::block()
      m_board[5][4] = '#';
      m_board[5][5] = '#';
      
-     
-     
      for (int r = 0; r < m_game.cols(); r++){
-     for (int c = 0; c < m_game.cols(); c++)
-     { m_board[r][c] = '#'; }
-     }
+        for (int c = 0; c < m_game.cols(); c++) {
+            m_board[r][c] = '#'; }
+        }
      
      m_board[1][3] = '.';
      m_board[2][3] = '.';
      m_board[3][3] = '.';
      m_board[4][3] = '.';
      m_board[4][2] = '.';
-     m_board[4][4] = '.'; //
+     m_board[4][4] = '.';
      m_board[4][5] = '.';
      m_board[3][5] = '.';
      m_board[2][5] = '.';
@@ -127,19 +120,18 @@ void BoardImpl::unblock()
 
 bool BoardImpl::placeShip(Point topOrLeft, int shipId, Direction dir)
 {
+    int opencounter = 0;
+    
     // invalid ship ID
     if (shipId < 0 || shipId > m_ships -1){
-        // cout << "1";
         return false;
     }
     
     // if point is out of bounds
     if (!m_game.isValid(topOrLeft)){
-        // cout << "2";
         return false;
     }
     
-    int opencounter = 0;
     // current board should not have any characters of the new ship that will be added
     for (int r = 0; r < m_game.rows(); r++){
         for (int c = 0; c < m_game.cols(); c++){
@@ -149,13 +141,12 @@ bool BoardImpl::placeShip(Point topOrLeft, int shipId, Direction dir)
             }
             
             if (m_board[r][c] == m_game.shipSymbol(shipId)){
-                // cout << "3";
                 return false;
             }
         }
     }
     
-    /*
+     /*
      int totallength = 0;
      for (int i = 0; i < m_game.nShips(); i++){
      totallength += m_game.shipLength(i);
@@ -170,14 +161,12 @@ bool BoardImpl::placeShip(Point topOrLeft, int shipId, Direction dir)
         case HORIZONTAL:
             // check out of bounds
             if (topOrLeft.c < 0 || topOrLeft.c + m_game.shipLength(shipId) > m_game.cols() || topOrLeft.r < 0 || topOrLeft.r > m_game.rows()){
-                // cout << "4";
                 return false;
             }
             
             // if position is blocked or has another ship
             for (int c = topOrLeft.c; c < topOrLeft.c + m_game.shipLength(shipId); c++){
                 if (m_board[topOrLeft.r][c] != '.'){
-                    // cout << "5";
                     return false;
                 }
             }
@@ -194,14 +183,12 @@ bool BoardImpl::placeShip(Point topOrLeft, int shipId, Direction dir)
         case VERTICAL:
             // check out of bounds
             if (topOrLeft.r < 0 || topOrLeft.r + m_game.shipLength(shipId) > m_game.rows() || topOrLeft.c < 0 || topOrLeft.c > m_game.cols()){
-                // cout << "6";
                 return false;
             }
             
             // if position is blocked or has another ship
             for (int r = topOrLeft.r; r < topOrLeft.r + m_game.shipLength(shipId); r++){
                 if (m_board[r][topOrLeft.c] != '.'){
-                    // cout << "7";
                     return false;
                 }
             }
@@ -278,7 +265,6 @@ void BoardImpl::display(bool shotsOnly) const
     // if shots only F -> use ship's symbol to display undamaged ship segments
     // if shots only T -> use period to display undamaged ship segment
     //********************************************
-    // print board
     
     // print spaces
     cout << "  ";
@@ -398,10 +384,6 @@ bool BoardImpl::allShipsDestroyed() const
 }
 
 //******************** Board functions ********************************
-
-// These functions simply delegate to BoardImpl's functions.
-// You probably don't want to change any of this code.
-
 Board::Board(const Game& g)
 {
     m_impl = new BoardImpl(g);
